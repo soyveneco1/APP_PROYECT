@@ -3,6 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+class Product {
+  String name;
+  int quantity;
+  File? image;
+
+  Product({required this.name, required this.quantity, this.image});
+}
+
 class INVENTARIO extends StatefulWidget {
   const INVENTARIO({super.key});
 
@@ -13,9 +21,7 @@ class INVENTARIO extends StatefulWidget {
 class _INVENTARIOState extends State<INVENTARIO> {
   late TextEditingController controller;
   late TextEditingController cantidadController;
-  File? imageFile;
-  String name = "";
-  int cantidad = 0;
+  List<Product> products = [];
 
   @override
   void initState() {
@@ -41,88 +47,15 @@ class _INVENTARIOState extends State<INVENTARIO> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Column(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: 290,
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 5,
-                margin: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
-                      child: imageFile != null
-                          ? Image.file(
-                              imageFile!,
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              "assets/images/sword.jpg",
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            margin: EdgeInsets.only(left: 10, top: 5),
-                            child: Text(
-                              name,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 20),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            margin: EdgeInsets.only(left: 10, top: 5),
-                            child: Text(
-                              "Precio de venta: $cantidad",
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 17),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            margin: EdgeInsets.only(left: 10, top: 5),
-                            child: Text(
-                              "Inventario: ",
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 17),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
+        child: ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: 8.0), // Add vertical spacing between cards
+              child: buildProductCard(products[index]),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -133,11 +66,108 @@ class _INVENTARIOState extends State<INVENTARIO> {
           if (data == null || data['name']!.isEmpty) return;
 
           setState(() {
-            this.name = data['name']!;
-            this.cantidad = int.parse(data['cantidad']!);
-            this.imageFile = data['image'];
+            products.add(
+              Product(
+                name: data['name']!,
+                quantity: int.parse(data['cantidad']!),
+                image: data['image'],
+              ),
+            );
           });
         },
+      ),
+    );
+  }
+
+  Widget buildProductCard(Product product) {
+    return Container(
+      width: double.infinity,
+      height: 290,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        elevation: 5,
+        margin: EdgeInsets.zero,
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: product.image != null
+                  ? Image.file(
+                      product.image!,
+                      width: double.infinity,
+                      height: 170,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      "assets/images/sword.jpg",
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+            ),
+            Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10, top: 5),
+                    child: Text(
+                      product.name,
+                      style: TextStyle(color: Colors.black, fontSize: 20),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10, top: 5),
+                    child: Text(
+                      "Cantidad comprada: ${product.quantity}",
+                      style: TextStyle(color: Colors.black54, fontSize: 17),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10, top: 5),
+                    child: Text(
+                      "Inventario: ",
+                      style: TextStyle(color: Colors.black54, fontSize: 17),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10, top: 5),
+                    child: Text(
+                      "Precio de mercado: ",
+                      style: TextStyle(color: Colors.black54, fontSize: 17),
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
